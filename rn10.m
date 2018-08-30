@@ -1,11 +1,11 @@
-function [outframe] = rn06(action,frame,fs,framecount,p)
+function [outframe] = rn10(action,frame,fs,framecount,p)
 % NOTES:
 % RMS needs to be callibrated
 %
 
 % create persistent buffer
 global template rmsres_store cmax_store templates
-persistent delay buffer buffer2 endmark maxc midx maxc2 c tidx spidx
+persistent delay buffer buffer2 endmark maxc midx maxc2 tidx spidx
 %nextindex
 
 plot_debug = 0;
@@ -76,7 +76,7 @@ switch action,
                 tidx = 2;
                 spidx = [];
 %                nextindex = 1;
-                save rn06_template template buffer
+                save rn10_template template buffer
             end
         end
 
@@ -84,15 +84,15 @@ switch action,
 
         % Estimate RMS
         RMS = sqrt(mean(buffer.^2));
-
-        if RMS>p.rmsthresh & ~isempty(template),
+        %fprintf('RMS:%f\n', RMS);
+        if RMS>p.rmsthresh && ~isempty(template)
             % Find best match
             Tsz = size(template,2);
-            if isempty(spidx) | (tidx~=spidx)
+            if isempty(spidx) || (tidx~=spidx)
                 %if size(template,1)<tidx | sum(abs(template(tidx,:)))==0,
 %                 nzidx = find(sum(abs(template),2)>0);
 %                 temp2use = mean(template(setdiff(nzidx,spidx),:),1);
-                if size(template,1)< (p.slices+1),
+                if size(template,1)< (p.slices+1)
                     temp2use = template(1,:);
                 else
                     temp2use = template(p.slices+1,:);
@@ -105,7 +105,7 @@ switch action,
                 temp2use = template(tidx,:);
             end
             c = testmult(buffer,temp2use,N+1,N);
-            
+
             oldmaxc = maxc2;
             maxc2 = maxc;
             
@@ -113,22 +113,22 @@ switch action,
 
             [maxc,midx] = max(c,[],2);
             if plot_debug
-            figure(2);clf();
-            plot(buffer(N+1:end));hold on;
-            plot(buffer(oldmidx:oldmidx+Tsz-1), 'g');
-            plot(0.8 * temp2use, 'r');
-            hold off;
-            drawnow();
+                figure(2);clf();
+                plot(buffer(N+1:end));hold on;
+                plot(buffer(oldmidx:oldmidx+Tsz-1), 'g');
+                plot(0.8 * temp2use, 'r');
+                hold off;
+                drawnow();
             end
-            % fprintf('maxc:%f midx %d\n',maxc, midx);
+            %fprintf('maxc:%f maxc2:%f cd:%f midx %d\n',maxc, maxc2, (maxc2-maxc + maxc2-oldmaxc), midx);
 
 %             plot(buffer);
 %             hold on;plot(temp2use,'r');hold off;
 %              cmax_store = [cmax_store,maxc];
              % [tidx oldmaxc maxc2 maxc]
-            if maxc<maxc2 & oldmaxc<maxc2  & (maxc2-maxc + maxc2-oldmaxc) > 0.2,
+            if maxc<maxc2 && oldmaxc<maxc2  && (maxc2-maxc + maxc2-oldmaxc) > 0.2
                 %nextindex = mod(nextindex,p.slices)+1;
-                %       fprintf('maxc2:%f tidx[%d] nextidx[%d]\n',maxc2,tidx,nextindex);
+                %fprintf('maxc2:%f tidx[%d] nextidx[%d]\n',maxc2,tidx,nextindex);
                 idx = oldmidx;
 %                 if numel(templates)<tidx | isempty(templates{tidx})
 %                     templates{tidx}(1,:) = buffer(idx:idx+Tsz-1)';

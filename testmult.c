@@ -5,9 +5,7 @@
 #define MYPOW(x)    (x*x)
 
 static int initialized = 0;
-
 static mxArray *corr_out     = NULL;
-static double  *corr_out_ptr = NULL;
 
 void cleanup(void) {
 	mexPrintf("MEX-file is terminating, destroying array\n");
@@ -23,6 +21,7 @@ void mexFunction(int nlhs,
 	double *buf_ptr,*template_ptr;
     int buf_start, framelen, templen;
     double frame_sum = 0.0, frame_norm=0.0, temp_norm=0.0;
+    double  *corr_out_ptr = NULL;
     
 	buf_ptr = (double*)mxGetPr(prhs[0]);
 	template_ptr = (double*)mxGetPr(prhs[1]);
@@ -39,8 +38,8 @@ void mexFunction(int nlhs,
 		mexAtExit(cleanup);
 		initialized = 1;
 
-		corr_out_ptr = mxGetPr(corr_out);
 	}
+    corr_out_ptr = mxGetPr(corr_out);
     
     // norm of template
     temp_norm = 0.0;
@@ -64,6 +63,6 @@ void mexFunction(int nlhs,
         corr_out_ptr[i0] = frame_sum/(sqrt(frame_norm)*temp_norm); 
     }
     
-    plhs[0] = corr_out;
+    plhs[0] = mxDuplicateArray(corr_out);
     return;
 }

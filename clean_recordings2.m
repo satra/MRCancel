@@ -21,16 +21,16 @@ cmax_store = [];
 
 % Read the file
 [y,fs] = audioread(in_file);
-y = y(39*fs:end); %:70*fs); % zeros(4*fs, 1)];
-framelen = round(0.5*fs); %round(0.025*fs);
+y = y((15*fs):end); %:70*fs); % zeros(4*fs, 1)];
+framelen = round(0.025*fs); %round(0.025*fs);
 
 %% Parameters
-p.TR = 1640; % Time of repetition
-p.slices= 1;
+p.TR = 4000; % Time of repetition
+p.slices= 25;
 
 p.window = p.TR/p.slices;             %approximate template window length [ms]
-p.windowext = 10;            %distortion in window length [ms]
-p.template_corr1 = 0.989; %0.997;     %correlation threshold for noise template match
+p.windowext = 100;            %distortion in window length [ms]
+p.template_corr1 = 0.997; %0.997;     %correlation threshold for noise template match
 p.template_corr2 = 0.97;     %correlation threshold when noise template
 %selected as a result of old correlation>new correlation
 p.rmsthresh  = 0.01;         %rms threshold on the normalized signal for
@@ -61,5 +61,5 @@ y = y(:);
 
 %% reduce noise and write output
 yout = soundframer(y,fs,framelen,@rn10,'',p);
-wavwrite(yout.*(yout<4), fs, out_file);
+audiowrite(out_file, yout.*(yout<4), fs);
 
