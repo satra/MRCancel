@@ -1,17 +1,20 @@
-function clean_recordings2(in_file, out_file, rmsthresh)
-% function clean_recodings(in_file, out_file)
+function clean_recordings2(in_file, out_file, TR, slices, rmsupdate, channel, onset, windowext, rmsthresh)
+% function clean_recodings(in_file, out_file, TR, slices, rmsupdate, channel, onset, windowext, rmsthresh)
 %
-% Removes scanner noise from jenny and paula's experiment
-%    clean_recordings('path_to_input', 'path_to_output');
+% Removes scanner noise from voice recordings
+%    clean_recordings('path_to_input', 'path_to_output', TR, slices, rmsupdate=0.007, channel=1, onset=0, windowext=20, rmsthresh=0.5);
 %
 % satra@mit.edu
 
 
 % Associated recall experiment
 
-if nargin<3,
-    rmsthresh = 0.02;
-end
+if nargin<5, rmsupdate = 0.007; end
+if nargin<6, channel = 1; end
+if nargin<7, onset = 0; end
+if nargin<8, windowext = 20; end
+if nargin<5, rmsthresh = 0.5; end
+ 
 global templates rmsres_store cmax_store template
 templates = [];
 template = [];
@@ -21,19 +24,19 @@ cmax_store = [];
 
 % Read the file
 [y,fs] = audioread(in_file);
-y = y((15*fs):end); %:70*fs); % zeros(4*fs, 1)];
+y = y((onset*fs):end, channel); %(100*fs), 2); % zeros(4*fs, 1)];
 framelen = round(0.025*fs); %round(0.025*fs);
 
 %% Parameters
-p.TR = 4000; % Time of repetition
-p.slices= 25;
+p.TR = TR; % Time of repetition
+p.slices = slices;
 
 p.window = p.TR/p.slices;             %approximate template window length [ms]
-p.windowext = 100;            %distortion in window length [ms]
+p.windowext = round(windowext);            %distortion in window length [ms]
 p.template_corr1 = 0.997; %0.997;     %correlation threshold for noise template match
 p.template_corr2 = 0.97;     %correlation threshold when noise template
 %selected as a result of old correlation>new correlation
-p.rmsthresh  = 0.01;         %rms threshold on the normalized signal for
+p.rmsthresh  = rmsthresh;         %rms threshold on the normalized signal for
 %either looking for signal or taking any
 %corrective action
 p.corr_remove = 0.9; %0.55        %remove noise only when old correlation is greater than this value
@@ -52,7 +55,7 @@ p.delay = floor(framelen+(2*(p.window+p.windowext))*1e-3*fs); %computed delay
 %05   p.wt_type = 6;p.rmsupdate = 0.008; %0.025;         %template updated when rms value of residual is less than this value
 %04     p.wt_type = 6;p.rmsupdate = 0.021; %0.025;         %template updated when rms value of residual is less than this value
 %06
-p.wt_type = 6;p.rmsupdate = rmsthresh; %0.025;         %template updated when rms value of residual is less than this value
+p.wt_type = 6;p.rmsupdate = rmsupdate; %0.025;         %template updated when rms value of residual is less than this value
 
 %% setup signal
 maxy = max(abs(y));

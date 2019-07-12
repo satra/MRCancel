@@ -61,14 +61,15 @@ switch action,
         if isempty(template)
             windowlen = N;
             %fprintf('N %d buffer %d\n', N, length(buffer));
-
             [template,startidx] = create_template03(buffer,buffer2,round((p.window+p.windowext*[-1 1])*1e-3*fs),p.rmsthresh,p.template_corr1,p.template_corr2,N,0);
-            %fig = figure(2);clf();
-            %subplot(211); plot(buffer);
-            %subplot(212); plot(buffer2);
-            %drawnow();
+            if 0
+             fig = figure(2);clf();
+             subplot(211); plot(buffer);
+             subplot(212); plot(buffer2);
+             drawnow();
+            end
             %template = create_template03(buffer,buffer2,round([0.055 0.065]*fs),0.1,0.99,0.9,N);
-            if ~isempty(template),
+            if ~isempty(template) && length(template) > (p.window - p.windowext - 1)
                 templates{1}(1,:) = template(:)';
                 [mxval,mxidx]= max(template);
                 %template = buffer(startidx+mxidx-3+[1:numel(template)]);
